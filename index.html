@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para Ela 💜</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;800&family=Montserrat:wght@200;400;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #9d4edd;
+            --secondary: #e0aaff;
+            --dark: #050505;
+            --glass-bg: rgba(20, 20, 20, 0.65);
+            --glass-border: rgba(157, 78, 221, 0.3);
+            --glow: 0 0 25px rgba(157, 78, 221, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--dark);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* --- OVERLAYS --- */
+        .noise-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.07; pointer-events: none; z-index: 50;
+        }
+
+        .ambient-light {
+            position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; overflow: hidden;
+        }
+        .orb {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4;
+            animation: float 25s infinite alternate ease-in-out;
+        }
+        .orb-1 { width: 300px; height: 300px; background: #5a189a; top: -50px; left: -50px; }
+        .orb-2 { width: 250px; height: 250px; background: #3c096c; bottom: -50px; right: -50px; animation-delay: -5s; }
+        .orb-3 { width: 150px; height: 150px; background: #9d4edd; top: 40%; left: 60%; opacity: 0.2; animation-duration: 15s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 60px) scale(1.2); }
+        }
+
+        /* --- CONTENT WRAPPER (O PALCO) --- */
+        .stage-wrapper {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 500px;
+        }
+
+        .stage-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+
+        /* Estado inicial: primeiro card centralizado */
+        .stage-container {
+            transform: translateX(0);
+        }
+
+        /* Estado ativo: move para mostrar ambos os cards */
+        .stage-container.active {
+            transform: translateX(-20%);
+        }
+
+        /* --- CARD PRINCIPAL --- */
+        .glass-card {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            min-width: 320px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 40px 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 1.5s ease;
+            flex-shrink: 0;
+        }
+
+        .stage-container.active #main-card {
+            transform: scale(0.9);
+            opacity: 0.7;
+            filter: blur(1px);
+        }
+
+        /* --- CARROSSEL --- */
+        .carousel-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            height: 160px;
+        }
+        .photo-ring {
+            position: absolute;
+            width: 145px;
+            height: 145px;
+            border-radius: 50%;
+            background: conic-gradient(transparent, var(--primary), transparent 30%);
+            animation: spin 4s linear infinite;
+        }
+        .profile-photo {
+            width: 135px;
+            height: 135px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #1a1a1a;
+            position: relative;
+            z-index: 2;
+            transition: opacity 0.4s ease-in-out, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            font-size: 18px;
+        }
+        .nav-btn:active { background: var(--primary); transform: translateY(-50%) scale(0.9); }
+        .prev { left: 0; }
+        .next { right: 0; }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- TEXTOS --- */
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #fff, #e0aaff, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(157, 78, 221, 0.6);
+        }
+        .subtitle {
+            font-family: 'Pinyon Script', cursive;
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            text-shadow: 0 0 10px rgba(157, 78, 221, 0.4);
+        }
+
+        /* --- STATS --- */
+        .stats-container {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 15px 0;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            text-align: center;
+            position: relative;
+        }
+        .stat-box:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            height: 60%;
+            width: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+        .stat-num {
+            display: block;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #fff;
+            text-shadow: 0 0 10px var(--primary);
+        }
+        .stat-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            color: #aaa;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .scroll-text-area {
+            width: 100%;
+            height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            padding-right: 10px;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            color: #d1d1d1;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
+        }
+        .scroll-text-area::-webkit-scrollbar {
+            width: 4px;
+        }
+        .scroll-text-area::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 2px;
+        }
+        .poetic-line {
+            display: block;
+            margin-bottom: 12px;
+            position: relative;
+            padding-left: 15px;
+        }
+        .poetic-line::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            top: 2px;
+            font-size: 0.6rem;
+            color: var(--primary);
+        }
+
+        /* --- PLAYER --- */
+        .music-player {
+            margin-top: 25px;
+            width: 100%;
+            cursor: pointer;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.3s;
+        }
+        .play-icon {
+            color: var(--primary);
+            font-size: 1.2rem;
+            min-width: 20px;
+        }
+        .song-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .song-title {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        .song-artist {
+            font-size: 0.6rem;
+            color: #888;
+        }
+        .equalizer {
+            display: flex;
+            gap: 2px;
+            margin-left: auto;
+            height: 15px;
+            align-items: flex-end;
+        }
+        .bar {
+            width: 3px;
+            background: var(--primary);
+            height: 3px;
+            animation: eq 1s infinite ease-in-out;
+            animation-play-state: paused;
+        }
+        .music-player.playing .bar {
+            animation-play-state: running;
+        }
+        .music-player.playing .bar:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .music-player.playing .bar:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes eq {
+            0%, 100% { height: 3px; }
+            50% { height: 15px; }
+        }
+
+        /* --- SEGUNDA FASE (O QUE SURGE) --- */
+        .next-phase-card {
+            width: 300px;
+            min-width: 280px;
+            height: 400px;
+            background: var(--glass-bg);
+            border: 1px solid var(--primary);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.9) translateX(50px);
+            transition: all 1.5s ease;
+            box-shadow: var(--glow);
+            padding: 30px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .stage-container.active .next-phase-card {
+            opacity: 1;
+            transform: scale(1) translateX(0);
+        }
+        
+        .phase-number {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--primary);
+        }
+        
+        .glow-button {
+            margin-top: 30px;
+            padding: 12px 25px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            border-radius: 50px;
+            box-shadow: 0 0 20px var(--primary);
+            transition: 0.3s;
+            display: inline-block;
+        }
+        
+        .glow-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px var(--primary);
+        }
+
+        /* --- RESPONSIVIDADE --- */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .stage-wrapper {
+                min-height: 400px;
+            }
+            
+            .stage-container {
+                gap: 20px;
+            }
+            
+            .stage-container.active {
+                transform: translateX(-30%);
+            }
+            
+            .glass-card,
+            .next-phase-card {
+                max-width: 320px;
+                min-width: 280px;
+            }
+            
+            .next-phase-card {
+                height: 380px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .stage-container {
+                flex-direction: column;
+                gap: 30px;
+                transform: translateY(0) !important;
+            }
+            
+            .stage-container.active {
+                transform: translateY(-20px) !important;
+            }
+            
+            .stage-container.active #main-card {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+            
+            .next-phase-card {
+                width: 90%;
+                height: auto;
+                min-height: 350px;
+                padding: 30px 20px;
+                transform: scale(0.9) translateY(50px) !important;
+            }
+            
+            .stage-container.active .next-phase-card {
+                transform: scale(1) translateY(0) !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="noise-overlay"></div>
+
+    <div class="ambient-light">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="stage-wrapper">
+        <div class="stage-container" id="stage">
+            
+            <div class="glass-card" id="main-card">
+                
+                <div class="carousel-wrapper">
+                    <div class="photo-ring"></div> 
+                    <button class="nav-btn prev" onclick="changePhoto(-1)">‹</button>
+                    <img src="" class="profile-photo" id="main-photo" alt="Ela">
+                    <button class="nav-btn next" onclick="changePhoto(1)">›</button>
+                </div>
+
+                <h1>Morceguinha</h1>
+                <div class="subtitle">Para a garota, que me mostrou a luz.</div>
+
+                <div class="stats-container">
+                    <div class="stat-box">
+                        <span class="stat-num">∞</span>
+                        <span class="stat-label">Amor</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-num">2</span>
+                        <span class="stat-label">Meses</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-num">2/4</span>
+                        <span class="stat-label">alma</span>
+                    </div>
+                </div>
+
+                <div class="scroll-text-area">
+                    <span class="poetic-line">Eu nunca pensei nisso. Sinceramente eu sempre odiei o mundo.</span>
+                    <span class="poetic-line">Eu sempre ouvi, como posso amar alguém, se eu mesmo não me amo?</span>
+                    <span class="poetic-line">E ai veio você, que me mostrou que pode me amar por nós dois,</span>
+                    <span class="poetic-line">Enquanto eu amo você pelo mundo inteiro.</span>
+                    <span class="poetic-line">Eu sempre disse que eu não sou nada, e você sempre me disse que</span>
+                    <span class="poetic-line">Mesmo sendo nada, pra você eu sou tudo.</span>
+                    <span class="poetic-line">Espero que eu possa algum dia, retribuir 2/4 do mundo que você já me deu.</span>
+                    <br>
+                    <p style="font-size: 0.7rem; color: #666; text-align: center;">(Acredite ou não... esse é só o começo.)</p>
+                </div>
+
+                <div class="music-player" onclick="toggleMusic()">
+                    <div class="play-icon" id="play-icon">▶</div>
+                    <div class="song-info">
+                        <span class="song-title">Nossa Música Favorita</span>
+                        <span class="song-artist">Toque para ouvir...</span>
+                    </div>
+                    <div class="equalizer">
+                        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="next-phase-card" id="next-card">
+                <div class="card-inner">
+                    <span class="phase-number">Fase 02</span>
+                    <h2 style="font-family: 'Cinzel', serif; margin: 15px 0; color: #fff;">O Próximo Capítulo</h2>
+                    <p style="font-size: 0.8rem; color: #aaa; line-height: 1.6;">Vou ter que usar muito, muito mais do que uma página.</p>
+                    <a href="pagina2.html" class="glow-button">Clique pra olhar dentro da minha →</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <audio id="audio-player" loop>
+        <source src="audio/planosbk.mp3" type="audio/mpeg">
+    </audio>
+
+   <script>
+  const photos = [
+    "meu_amor_(perfil)/perfil1.jpeg", 
+    "meu_amor_(perfil)/perfil2.jpeg", 
+    "meu_amor_(perfil)/perfil3.jpeg", 
+    "meu_amor_(perfil)/perfil4.jpeg", 
+  ];
+
+  let currentIndex = 0;
+  const imgElement = document.getElementById('main-photo');
+
+  // função única pra aplicar transform corretamente
+  function applyTransform(scale = 1) {
+    imgElement.style.transform = `rotate(270deg) scale(${scale})`;
+  }
+
+  // carrega a primeira imagem
+  if (photos.length > 0) {
+    imgElement.src = photos[0];
+    applyTransform(1);
+  }
+
+  // --- PLAYER ---
+  const audio = document.getElementById('audio-player');
+  const playerBox = document.querySelector('.music-player');
+  const icon = document.getElementById('play-icon');
+  const artistLabel = document.querySelector('.song-artist');
+
+  function toggleMusic() {
+    if (audio.paused) {
+      audio.play().then(() => {
+        playerBox.classList.add('playing');
+        icon.innerHTML = '⏸';
+        artistLabel.innerHTML = 'Tocando agora...';
+      }).catch(e => {
+        console.log("Erro ao reproduzir áudio:", e);
+        artistLabel.innerHTML = 'Erro ao reproduzir';
+      });
+    } else {
+      audio.pause();
+      playerBox.classList.remove('playing');
+      icon.innerHTML = '▶';
+      artistLabel.innerHTML = 'Pausado';
+    }
+  }
+
+  function changePhoto(direction) {
+    if (audio.paused) {
+      toggleMusic();
+    }
+
+    applyTransform(0.9);
+    imgElement.style.opacity = "0.5";
+
+    setTimeout(() => {
+      currentIndex += direction;
+      if (currentIndex >= photos.length) currentIndex = 0;
+      if (currentIndex < 0) currentIndex = photos.length - 1;
+
+      const newImage = new Image();
+      newImage.src = photos[currentIndex];
+      newImage.onload = () => {
+        imgElement.src = photos[currentIndex];
+        applyTransform(1);
+        imgElement.style.opacity = "1";
+      };
+    }, 300);
+  }
+
+  // --- TRANSIÇÃO AUTOMÁTICA ---
+  setTimeout(() => {
+    document.getElementById('stage').classList.add('active');
+  }, 15000);
+
+  // --- CARROSSEL AUTOMÁTICO ---
+  setInterval(() => {
+    changePhoto(1);
+  }, 5000);
+
+  // --- SISTEMA DE PERSISTÊNCIA DE ÁUDIO ---
+const AUDIO_KEY = "player_state";
+
+// Antes de sair da página, salva onde a música parou
+window.addEventListener("beforeunload", () => {
+    localStorage.setItem(AUDIO_KEY, JSON.stringify({
+        time: audio.currentTime,
+        playing: !audio.paused
+    }));
+});
+
+// Opcional: Salva a cada 1 segundo para garantir caso o celular feche do nada
+setInterval(() => {
+    if(!audio.paused) {
+        localStorage.setItem(AUDIO_KEY, JSON.stringify({
+            time: audio.currentTime,
+            playing: true
+        }));
+    }
+}, 1000);
+</script>
+
+</body>
+</html>

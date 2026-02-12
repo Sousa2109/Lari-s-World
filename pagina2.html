@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dentro da minha alma 💜</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;800&family=Montserrat:wght@200;400;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #9d4edd;
+            --secondary: #e0aaff;
+            --dark: #050505;
+            --glass-bg: rgba(20, 20, 20, 0.85); /* Mais escuro para leitura */
+            --glass-border: rgba(157, 78, 221, 0.4);
+            --glow: 0 0 30px rgba(157, 78, 221, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--dark);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* Trava a rolagem da página inteira */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- AMBIENTE --- */
+        .noise-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.07; pointer-events: none; z-index: 0;
+        }
+        .ambient-light { position: fixed; width: 100%; height: 100%; z-index: 0; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.4; }
+        .orb-1 { width: 300px; height: 300px; background: #5a189a; top: -50px; left: -50px; }
+        .orb-2 { width: 300px; height: 300px; background: #3c096c; bottom: -50px; right: -50px; }
+
+        /* --- TÍTULO FLUTUANTE --- */
+        .header-floating {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            z-index: 20;
+            width: 100%;
+        }
+        .header-floating h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        /* --- O CONTAINER DO BARALHO --- */
+        .deck-container {
+            position: relative;
+            width: 100%;
+            height: 75vh; /* Altura do baralho na tela */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px; /* Para o efeito 3D */
+            z-index: 10;
+        }
+
+        /* --- OS BOTÕES LATERAIS --- */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-size: 1.5rem;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .nav-btn:active { background: var(--primary); color: #fff; transform: translateY(-50%) scale(0.9); }
+        .prev-btn { left: 15px; }
+        .next-btn { right: 15px; }
+
+        /* --- A CARTA (CARD) --- */
+        .soul-card {
+            position: absolute;
+            width: 80%; /* Menos largo */
+            max-width: 320px;
+            height: 100%; /* Mais longo */
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 0; /* Padding removido aqui para a imagem colar na borda */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s, z-index 0s;
+        }
+
+        /* ESTADOS DA ANIMAÇÃO DO BARALHO */
+        
+        /* Carta Ativa (Frente) */
+        .soul-card.active {
+            z-index: 10;
+            transform: translateX(0) scale(1) translateY(0);
+            opacity: 1;
+            border-color: var(--primary);
+            box-shadow: 0 0 25px rgba(157, 78, 221, 0.3);
+        }
+
+        /* Carta de Trás (Próxima) */
+        .soul-card.behind {
+            z-index: 5;
+            transform: translateX(15px) scale(0.92) translateY(15px); /* Levemente deslocada para dar volume */
+            opacity: 0.6;
+            filter: brightness(0.5);
+        }
+
+        /* Carta Oculta (Fundo do baralho) */
+        .soul-card.hidden {
+            z-index: 1;
+            transform: translateX(30px) scale(0.85) translateY(30px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Animação de Saída (Indo para o fundo) */
+        .soul-card.moving-to-back {
+            transform: translateX(-150%) rotate(-15deg); /* Sai voando para a esquerda */
+            opacity: 0;
+        }
+
+        /* --- CONTEÚDO DA CARTA --- */
+        .card-image {
+            width: 100%;
+            height: 220px; /* Banner alto */
+            object-fit: cover;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .card-content {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Segura o scroll */
+        }
+
+        .card-content h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        /* Área de Texto com Scroll Interno */
+        .scroll-text {
+            flex: 1;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: #d0d0d0;
+            padding-right: 5px;
+            text-align: justify;
+        }
+
+        /* Scrollbar roxa fininha */
+        .scroll-text::-webkit-scrollbar { width: 3px; }
+        .scroll-text::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+        /* Rodapé com Contador */
+        .card-footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.7rem;
+            color: #666;
+            font-family: 'Cinzel', serif;
+        }
+        
+        /* BOTÃO DE VOLTAR FIXO */
+        .back-home {
+            position: absolute;
+            bottom: 20px;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.75rem;
+            z-index: 100;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .future-button {
+    position: absolute;
+    bottom: 40px;
+    padding: 14px 30px;
+    background: var(--primary);
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    border-radius: 50px;
+    box-shadow: 0 0 25px var(--primary);
+
+    /* estado oculto */
+    opacity: 0;
+    transform: translateY(60px);
+    pointer-events: none;
+
+    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.6s ease;
+    z-index: 200;
+}
+
+/* estado visível */
+.future-button.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+
+    </style>
+</head>
+<body>
+
+    <div class="noise-overlay"></div>
+    <div class="ambient-light">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="header-floating">
+        <h1>Minha Alma</h1>
+    </div>
+
+    <div class="deck-container">
+        
+        <button class="nav-btn prev-btn" onclick="prevCard()">‹</button>
+
+        <div class="soul-card active">
+            <img src="banners_roxo/roxo1.jpeg" class="card-image">
+            <div class="card-content">
+                <h2>O Começo</h2>
+                <div class="scroll-text">
+                    <p>
+                        Eu sempre fui fechado. Fechado ao extremo. Eu não gosto de ninguém, quando gosto, são 5 pessoas que eu vou manter até o máximo possível
+                        <br><br>
+                        Quando eu te conheci, eu não queria conhecer ninguém, quando eu te conheci eu "odiava" a zero two, porque sou extremista, ou eu gosto, ou odeio, sem meio termo. E quer saber? eu também não pensei que gostaria de te conehcer, mas sim. EU amei. Eu não me arrependo, e essa é uma das poucas vezes que isso acontece desde a ultima.
+                        <br><br>
+                        Eu sinceramente, amo você. E isso pra mim é a maior declaração. Eu odeio essa palavra, porque sempre que me foram apresentados, eu acabei querendo me enfiar numa cova, literalmente. Todas as vezes que essa palavra me foi *Dada* ela me foi tirada a mão armada. Eu não sou acostumado com ela, mas por você, eu posso tentar me acostumar. 
+                        <br><br>
+                        Eu produzi tudo isso, pra se tudo ser errado, você olhar pra esse aplicativo, e entender que este é o mínimo. Eu não posso te dar lírios, rosas, ou sua cor favorita, Roxo. Então, eu fiz um site lotado delas. 
+                    </p>
+                </div>
+            </div>
+            <div class="card-footer">1 / 4</div>
+        </div>
+
+        <div class="soul-card behind">
+            <img src="banners_roxo/roxo2.jpeg" class="card-image">
+            <div class="card-content">
+                <h2>A Distância</h2>
+                <div class="scroll-text">
+                    <p>
+                        Dizem que não dá pra amar alguém que não dá pra tocar ou olhar nos olhos, mas pra mim, essa é a forma mais bonitia de começar a amar. Eu já vi tantas vezes pessoas passarem a se amar pessoalmente, e depois que a carne se sacia a paixão também se esvai, que eu passe a achar esse sentimento problemático quando dado, e não comprado.
+                        <br><br>
+                        Você me mostrou o contrário, todas as vezes que eu encarei o celular esperando sua notificação, todas as vezes que eu mandei mensagem sorrindo, logo após passar por algo que me faria passar horas chorando. Eu notei, quando eu abdiquei da minha confortável solitude, pra viveer a favor da sua suave meré.
+                        <br><br>
+                        A cada linha, das 3552 desse código imenso, A CADA LINHA, eu amei você, eu amei digitar, eu amei escrever, eu amei pensar em você por todo esse tempo, eu amei fazer isso ENQUANTO conversava com você, eu amei pensar em você em TODOS, os momentos. Essa foi reflexão mais calorosa que já fiz, a reflexão mais divertida, a reflexão mais feliz que eu já fiz, e o momento em que eu mais me orgulhei de saber fazer oque faço.
+                    </p>
+                </div>
+            </div>
+            <div class="card-footer">2 / 4</div>
+        </div>
+
+        <div class="soul-card hidden">
+            <img src="banners_roxo/roxo3.jpeg" class="card-image">
+            <div class="card-content">
+                <h2>Seus Detalhes</h2>
+                <div class="scroll-text">
+                    <p>
+                        Sobre gostos… Ela quer alguém que faça a diferença, ela gosta de suco de uva mas prefere pêssego, ela adora Chase Atlantic, aposto que é flamenguista. Ela gosta de uma parada chamada bala derretida, oque é estranho. Eu não consigo imaginar bala derretida sendo bom. Ela aparentemente fica elétrica ao comer doce. segundo ela. 
+Eu tenho 2/4 da alma dela, imagina eu posso fazer um pacto com isso pra ela ser minha? ia ser interessante. Eu disse que se eu morresse, eu viraria um espirito grudado nela, esperando ela morrer também. Eu me senti o ápice do romance, com certeza não foi. Ela tira minha vontade de beber. Eu bebo quando tô triste, mas perto dela eu nunca tô triste. Eu me sinto… confortável, feliz, animado. 
+isso é perigoso, eu gosto dela. 
+
+Eu amo seus cabelos pretos, eu amo seus olhos bonitos. Eu amo a sua voz, cujo eu só ouvi UMA UNIDADE DE PALAVRA. uma. “QUE?” caralho, e que Voz..
+Eu passei a amar sua cor favorita, passei a amar me divertir com Você, passei a amar conversar com Você, passei a amar dividir meu tempo com Você. Eu amo você.
+                        <br><br>
+                        Não só na sua aparência, que é a obra de arte mais linda que já vi (e olha que eu tentei caprichar no design desse site para chegar aos seus pés), mas nos detalhes de quem você é.
+                        <br><br>
+                        Sua bondade, sua força, a maneira como você enfrenta os problemas. Você é minha inspiração diária.
+                    </p>
+                </div>
+            </div>
+            <div class="card-footer">3 / 4</div>
+        </div>
+
+        <div class="soul-card hidden">
+            <img src="banners_roxo/roxo4.jpeg" class="card-image">
+            <div class="card-content">
+                <h2>Futuro</h2>
+                <div class="scroll-text">
+                    <p>
+                        isso, é só a droga do começo desse app que eu fiz com tanto amor.
+                    </p>
+                </div>
+            </div>
+            <div class="card-footer">4 / 4</div>
+        </div>
+
+        <button class="nav-btn next-btn" onclick="nextCard()">›</button>
+
+    </div>
+
+    <audio id="audio-player" loop>
+        <source src="audio/planosbk.mp3" type="audio/mpeg">
+    </audio>
+    
+    <a href="index.html" class="back-home">Voltar ao Início</a>
+
+    <a href="player.html" id="future-btn" class="future-button">
+  Me guie para o que vem depois →
+</a>
+
+
+   <script>
+        // --- LÓGICA DAS CARTAS (BARALHO) ---
+        const cards = document.querySelectorAll('.soul-card');
+        let currentIndex = 0;
+
+        const futureBtn = document.getElementById("future-btn");
+let futureTimeout = null;
+
+
+function updateCards() {
+    cards.forEach((card, index) => {
+        card.classList.remove('active', 'behind', 'hidden', 'moving-to-back');
+
+        let position = (index - currentIndex + cards.length) % cards.length;
+
+        if (position === 0) card.classList.add('active');
+        else if (position === 1) card.classList.add('behind');
+        else card.classList.add('hidden');
+    });
+
+    // sempre limpa estado
+    futureBtn.classList.remove("show");
+    if (futureTimeout) {
+        clearTimeout(futureTimeout);
+        futureTimeout = null;
+    }
+
+    // se estiver no último card ("Futuro")
+    if (currentIndex === cards.length - 1) {
+        futureTimeout = setTimeout(() => {
+            futureBtn.classList.add("show");
+        }, 5000); // ⏱️ 5 segundos reais
+    }
+}
+
+
+
+        function nextCard() {
+            const currentCard = cards[currentIndex];
+            currentCard.classList.add('moving-to-back');
+            setTimeout(() => {
+                currentIndex = (currentIndex + 1) % cards.length;
+                updateCards();
+            }, 300);
+        }
+
+        function prevCard() {
+            currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+            updateCards();
+        }
+
+        updateCards();
+
+        // --- LÓGICA DE RECUPERAÇÃO DO ÁUDIO ---
+        const audio = document.getElementById("audio-player");
+        const AUDIO_KEY = "player_state";
+        const savedState = JSON.parse(localStorage.getItem(AUDIO_KEY));
+
+        if (savedState) {
+            audio.currentTime = savedState.time || 0;
+            
+            if (savedState.playing) {
+                // Fade-in suave para não dar susto
+                audio.volume = 0;
+                audio.play().then(() => {
+                    let vol = 0;
+                    const fadeIn = setInterval(() => {
+                        vol += 0.05;
+                        if (vol >= 1) {
+                            audio.volume = 1;
+                            clearInterval(fadeIn);
+                        } else {
+                            audio.volume = vol;
+                        }
+                    }, 100);
+                }).catch(e => console.log("Autoplay bloqueado pelo browser"));
+            }
+        }
+
+        // Continua salvando para caso ela volte para a index
+        window.addEventListener("beforeunload", () => {
+            localStorage.setItem(AUDIO_KEY, JSON.stringify({
+                time: audio.currentTime,
+                playing: !audio.paused
+            }));
+        });
+    </script>
+</body>
+</html>
